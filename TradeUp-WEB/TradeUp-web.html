@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeUp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Configure Tailwind CSS for dark mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    // you can extend your theme here if needed
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-20">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-2xl font-bold text-gray-800 dark:text-white">TradeUp</a>
+            <div class="flex items-center">
+                <a href="#home" class="nav-link text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 mx-2">Home</a>
+                <a href="#login" id="login-nav-link" class="nav-link text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 mx-2">Login</a>
+                <a href="#dashboard" id="dashboard-nav-link" class="nav-link text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 mx-2 hidden">Dashboard</a>
+                <a href="#" id="logout-nav-link" class="text-red-500 hover:text-red-700 mx-2 hidden">Logout</a>
+                <button id="theme-toggle" class="ml-4 text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 focus:outline-none">
+                    <!-- Sun Icon -->
+                    <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-15.66l-.707.707M4.04 19.96l-.707.707M21 12h-1M4 12H3m16.66 4.34l-.707-.707M5.04 5.04l-.707-.707"></path><circle cx="12" cy="12" r="5"></circle></svg>
+                    <!-- Moon Icon -->
+                    <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <!-- All pages will be rendered here -->
+        <div id="home" class="page"></div>
+        <div id="login" class="page"></div>
+        <div id="register" class="page"></div>
+        <div id="dashboard" class="page"></div>
+    </main>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-30">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Complete Your Payment</h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">Scan the QR code with any UPI app to pay.</p>
+            
+            <img src="https://i.imgur.com/j8hFkWS.jpeg" alt="UPI QR Code" class="mx-auto w-48 h-48 border rounded-lg bg-white p-2">
+            
+            <p class="mt-4 font-semibold text-lg text-gray-800 dark:text-white">UPI ID: kawarkirk230@okaxis</p>
+            <p class="font-bold text-2xl text-blue-600 my-2">Amount: ₹999</p>
+            
+            <hr class="my-6 border-gray-200 dark:border-gray-600">
+            
+            <p class="text-gray-600 dark:text-gray-300 mb-4">After paying, enter the UPI Transaction ID below to confirm your registration.</p>
+            <form id="payment-confirmation-form">
+                <input type="text" id="upi-transaction-id" placeholder="Enter UPI Transaction ID (e.g., 2185...)" required class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-center text-gray-800 dark:text-white">
+                <button type="submit" id="confirm-payment-btn" class="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition">Confirm Payment</button>
+                <button type="button" id="cancel-payment-btn" class="w-full mt-2 text-gray-600 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Templates for Pages -->
+    <template id="template-home">
+        <section class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">Unlock Your Trading Potential with Smart Money Concepts</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Join our network and gain access to an exclusive guide on SMC Trading for just ₹999. Share and earn commissions!</p>
+            <a href="#register" class="bg-blue-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-600 transition-colors">Join Now for ₹999</a>
+        </section>
+        <section class="mt-16">
+            <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-10">How It Works</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center"><div class="text-4xl mb-4 text-blue-500">1</div><h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Purchase the Guide</h3><p class="text-gray-600 dark:text-gray-300">Get started by purchasing our comprehensive SMC Trading PDF for a one-time fee.</p></div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center"><div class="text-4xl mb-4 text-blue-500">2</div><h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Share Your Code</h3><p class="text-gray-600 dark:text-gray-300">Receive your unique referral code and share it with friends and family.</p></div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center"><div class="text-4xl mb-4 text-blue-500">3</div><h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Earn Commissions</h3><p class="text-gray-600 dark:text-gray-300">Earn direct and level-based commissions for every sale made through your network.</p></div>
+            </div>
+        </section>
+        <!-- PDF Content Section -->
+        <section class="mt-16 pt-10 border-t border-gray-200 dark:border-gray-700">
+            <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-10">What You'll Learn</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Column 1: SMC Global Securities -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">1. SMC Global Securities Ltd.</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">An overview of one of India's leading full-service brokerage and financial services companies.</p>
+                    <div class="space-y-2 text-gray-700 dark:text-gray-300">
+                        <p><strong>Founded:</strong> 1990</p>
+                        <p><strong>Headquarters:</strong> New Delhi, India</p>
+                        <p><strong>Services:</strong> Equity, Commodity, Currency, Mutual Funds, IPOs, Insurance, and more.</p>
+                    </div>
+                </div>
+                <!-- Column 2: Smart Money Concepts -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">2. Smart Money Concepts (SMC)</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">A powerful trading strategy based on institutional behavior, popular in Forex, crypto, and stock indices.</p>
+                    <h4 class="font-semibold mb-2 text-gray-800 dark:text-white">Core Concepts Include:</h4>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                        <li><strong>Market Structure:</strong> Recognizing trends.</li>
+                        <li><strong>Order Blocks (OB):</strong> Identifying key supply/demand zones.</li>
+                        <li><strong>Liquidity Pools:</strong> Finding where stop-losses are collected.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="template-login">
+        <div class="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-6">Sign In</h2><form id="login-form"><div id="login-error" class="hidden bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 p-3 rounded-lg mb-4"></div><input type="email" id="login-email" placeholder="Email" required class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white"/><input type="password" id="login-password" placeholder="Password" required class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white"/><button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition">Sign In</button></form><p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">Don't have an account? <a href="#register" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">Sign Up</a></p></div>
+    </template>
+
+    <template id="template-register">
+        <div class="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-6">Create Your Account</h2><form id="register-form"><div id="register-error" class="hidden bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 p-3 rounded-lg mb-4"></div><div id="register-success" class="hidden bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-200 p-3 rounded-lg mb-4"></div><input type="text" id="register-name" placeholder="Full Name" required class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white"/><input type="email" id="register-email" placeholder="Email" required class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white"/><input type="password" id="register-password" placeholder="Password (min. 6 characters)" required class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white"/><input type="text" id="register-referral" placeholder="Referral Code (Optional)" class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white"/><button type="submit" class="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition">Register & Pay ₹999</button></form></div>
+    </template>
+
+    <template id="template-dashboard">
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-6">Dashboard</h1><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h4 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">Total Earnings</h4><p id="dashboard-earnings" class="text-3xl font-bold text-gray-800 dark:text-white">₹0.00</p></div><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h4 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">Available Balance</h4><p id="dashboard-balance" class="text-3xl font-bold text-gray-800 dark:text-white">₹0.00</p></div><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h4 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">Direct Referrals</h4><p id="dashboard-referrals" class="text-3xl font-bold text-gray-800 dark:text-white">0</p></div></div><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h3 class="text-xl font-semibold text-gray-700 dark:text-white mb-4">Your Referral Code</h3><div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg flex items-center justify-between"><p id="dashboard-referral-code" class="text-gray-800 dark:text-gray-200 font-mono">Loading...</p><button id="copy-code-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Copy Code</button></div></div>
+    </template>
+
+
+    <!-- Firebase and App Logic -->
+    <script type="module">
+        // --- Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, writeBatch, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // --- IMPORTANT: Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3rWp3ea-d23JqoNpytk2p1-Yw-4DFE1Q",
+            authDomain: "tradeup-webapp.firebaseapp.com",
+            projectId: "tradeup-webapp",
+            storageBucket: "tradeup-webapp.firebasestorage.app",
+            messagingSenderId: "313536637922",
+            appId: "1:313536637922:web:47fbbba247016d84b627bb",
+            measurementId: "G-XZ0T6VMS8M"
+        };
+
+        // --- Initialize Firebase ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- App Constants ---
+        const PRODUCT_PRICE = 999;
+        const PRODUCT_NAME = "SMC Trading Concepts PDF";
+        const DIRECT_COMMISSION_RATE = 0.20; // 20%
+        const LEVEL_1_COMMISSION_RATE = 0.10; // 10%
+
+        // --- UI Elements ---
+        const pages = document.querySelectorAll('.page');
+        const loginNavLink = document.getElementById('login-nav-link');
+        const dashboardNavLink = document.getElementById('dashboard-nav-link');
+        const logoutNavLink = document.getElementById('logout-nav-link');
+        const paymentModal = document.getElementById('payment-modal');
+        const themeToggleButton = document.getElementById('theme-toggle');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+
+        // --- THEME SWITCHER LOGIC ---
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            lightIcon.classList.remove('hidden');
+            darkIcon.classList.add('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            darkIcon.classList.remove('hidden');
+            lightIcon.classList.add('hidden');
+        }
+
+        themeToggleButton.addEventListener('click', function() {
+            lightIcon.classList.toggle('hidden');
+            darkIcon.classList.toggle('hidden');
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+
+
+        // --- Page Navigation & Rendering Logic ---
+        function renderPage(pageId) {
+            const pageContainer = document.getElementById(pageId);
+            if (!pageContainer) return;
+            const template = document.getElementById(`template-${pageId}`);
+            if (template) {
+                pageContainer.innerHTML = template.innerHTML;
+            }
+        }
+        
+        function showPage(pageId) {
+            pages.forEach(page => page.classList.toggle('active', page.id === pageId));
+            renderPage(pageId);
+            bindPageEventListeners(pageId);
+        }
+
+        window.addEventListener('hashchange', () => {
+            const pageId = window.location.hash.substring(1) || 'home';
+            showPage(pageId);
+        });
+
+        const initialPage = window.location.hash.substring(1) || 'home';
+        showPage(initialPage);
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const pageId = this.getAttribute('href').substring(1);
+                window.location.hash = pageId;
+            });
+        });
+
+        // --- Auth State Management ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (!userDoc.exists() || userDoc.data().paymentStatus === 'pending') {
+                    if (window.location.hash.substring(1) !== 'login') {
+                         await signOut(auth); // Force sign out if status is pending
+                    }
+                    return;
+                }
+                
+                loginNavLink.classList.add('hidden');
+                dashboardNavLink.classList.remove('hidden');
+                logoutNavLink.classList.remove('hidden');
+                
+                const currentPageId = window.location.hash.substring(1);
+                if (['login', 'register', 'home', ''].includes(currentPageId)) {
+                     window.location.hash = 'dashboard';
+                } else {
+                    showPage(currentPageId);
+                }
+            } else {
+                loginNavLink.classList.remove('hidden');
+                dashboardNavLink.classList.add('hidden');
+                logoutNavLink.classList.add('hidden');
+                const currentPageId = window.location.hash.substring(1);
+                if (currentPageId === 'dashboard') {
+                    window.location.hash = 'home';
+                }
+            }
+        });
+
+        // --- Event Listener Binding ---
+        function bindPageEventListeners(pageId) {
+            if (pageId === 'login') {
+                document.getElementById('login-form')?.addEventListener('submit', handleLogin);
+            }
+            if (pageId === 'register') {
+                document.getElementById('register-form')?.addEventListener('submit', handleRegister);
+            }
+            if (pageId === 'dashboard') {
+                document.getElementById('copy-code-btn')?.addEventListener('click', handleCopyCode);
+                loadDashboardData(auth.currentUser?.uid);
+            }
+        }
+
+        // --- Event Handlers ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.classList.add('hidden');
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+
+                if (!userDoc.exists() || userDoc.data().paymentStatus === 'pending') {
+                    await signOut(auth);
+                    errorDiv.textContent = "Your account is awaiting payment verification. Please try again later.";
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                e.target.reset();
+                window.location.hash = 'dashboard';
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const password = document.getElementById('register-password').value;
+            const errorDiv = document.getElementById('register-error');
+            errorDiv.classList.add('hidden');
+            if (password.length < 6) {
+                errorDiv.textContent = "Password must be at least 6 characters long.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            paymentModal.classList.remove('hidden');
+        }
+        
+        function handleCopyCode() {
+            const code = document.getElementById('dashboard-referral-code').textContent;
+            navigator.clipboard.writeText(code).then(() => alert('Referral code copied to clipboard!'));
+        }
+
+        // --- Payment Modal Logic ---
+        document.getElementById('cancel-payment-btn').addEventListener('click', () => {
+            paymentModal.classList.add('hidden');
+        });
+
+        document.getElementById('payment-confirmation-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('confirm-payment-btn');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const referralCode = document.getElementById('register-referral').value;
+            const transactionId = document.getElementById('upi-transaction-id').value;
+            
+            const errorDiv = document.getElementById('register-error');
+            const successDiv = document.getElementById('register-success');
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+
+            try {
+                let referrer = null;
+                if (referralCode) {
+                    const q = query(collection(db, "users"), where("referralCode", "==", referralCode));
+                    const querySnapshot = await getDocs(q);
+                    if (querySnapshot.empty) throw new Error("Invalid referral code.");
+                    referrer = { uid: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
+                }
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const newUser = userCredential.user;
+                const ownReferralCode = `${name.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '')}${Math.floor(1000 + Math.random() * 9000)}`;
+
+                const userData = { name, email, referralCode: ownReferralCode, referrerId: referrer ? referrer.uid : null, downline: [], createdAt: serverTimestamp(), totalEarnings: 0, balance: 0, paymentStatus: 'pending', upiTransactionId: transactionId };
+                
+                const batch = writeBatch(db);
+                batch.set(doc(db, "users", newUser.uid), userData);
+
+                if (referrer) {
+                    const directCommission = PRODUCT_PRICE * DIRECT_COMMISSION_RATE;
+                    const referrerRef = doc(db, "users", referrer.uid);
+                    batch.update(referrerRef, { downline: [...referrer.downline, newUser.uid] });
+                    
+                    const newTotalEarnings = (referrer.totalEarnings || 0) + directCommission;
+                    const newBalance = (referrer.balance || 0) + directCommission;
+                    batch.update(referrerRef, { totalEarnings: newTotalEarnings, balance: newBalance });
+                }
+                
+                await batch.commit();
+                await signOut(auth);
+                
+                paymentModal.classList.add('hidden');
+                document.getElementById('register-form').reset();
+                successDiv.textContent = 'Registration submitted! Your account will be activated after payment verification (within 24 hours).';
+                successDiv.classList.remove('hidden');
+
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Confirm Payment';
+            }
+        });
+
+        // --- Dashboard Logic ---
+        async function loadDashboardData(uid) {
+            if (!uid) return;
+            const userDoc = await getDoc(doc(db, "users", uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                document.getElementById('dashboard-earnings').textContent = `₹${(userData.totalEarnings || 0).toFixed(2)}`;
+                document.getElementById('dashboard-balance').textContent = `₹${(userData.balance || 0).toFixed(2)}`;
+                document.getElementById('dashboard-referrals').textContent = userData.downline ? userData.downline.length : 0;
+                document.getElementById('dashboard-referral-code').textContent = userData.referralCode;
+            }
+        }
+        
+        // --- Logout ---
+        logoutNavLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await signOut(auth);
+            window.location.hash = 'home';
+        });
+
+    </script>
+</body>
+</html>
